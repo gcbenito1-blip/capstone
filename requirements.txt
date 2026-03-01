@@ -6,3 +6,4 @@ matplotlib
 nltk
 plotly
 xgboost
+streamlit-shadcn-ui
