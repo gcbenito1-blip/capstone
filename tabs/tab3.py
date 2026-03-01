@@ -50,89 +50,82 @@ disp.plot(cmap=plt.cm.Blues, ax=ax3, colorbar=False)  # embed in ax, no extra co
 ax3.set_title("Confusion Matrix")
 
 def render():
-    st.header('Model Evaluation', anchor=False)
-    st.markdown("""<p class="sub-text">Evaluating the accuracy and reliability of the predictive model""", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("**Regression Performance**")
+        r1, r2, r3 = st.columns(3)
+        with r1:
+            with st.container():
+                st.metric(
+                    border=True,
+                    label="Root Mean Squared Error",
+                    help="This is a helper for this metric",
+                    value=1.0,
+                )
+        with r2:
+                st.metric(
+                    border=True,
+                    label="Mean Absolute Error",
+                    help="This is the meaning of this metric",
+                    value=2.0,
+                )
+        with r3:
+            st.metric(
+                border=True,
+                label="R² Score",
+                help="This is a helper for this metric",
+                value=3.0,
+            )
 
-    if not st.session_state.get("tab1_ready", False):
-        st.warning('Please Upload your dataset first')
-        st.stop()
-    else:
-        with st.container():
-            st.markdown("**Regression Performance**")
-            r1, r2, r3 = st.columns(3)
-            with r1:
-                with st.container():
-                    st.metric(
-                        border=True,
-                        label="Root Mean Squared Error",
-                        help="This is a helper for this metric",
-                        value=1.0,
-                    )
-            with r2:
-                    st.metric(
-                        border=True,
-                        label="Mean Absolute Error",
-                        help="This is the meaning of this metric",
-                        value=2.0,
-                    )
-            with r3:
-                st.metric(
-                    border=True,
-                    label="R² Score",
-                    help="This is a helper for this metric",
-                    value=3.0,
-                )
+    with st.container():
+        st.markdown("**Classification Performance**")
+        s1, s2, s3, s4, s5 = st.columns(5)
+        with s1:
+            st.metric(
+                border=True,
+                label="Accuracy",
+                help="This is a helper for this metric",
+                value="87%",
+            )
+        with s2:
+            st.metric(
+                border=True,
+                label="Precision",
+                help="This is a helper for this metric",
+                value="83%",
+            )
+        with s3:
+            st.metric(
+                border=True,
+                label="Recall",
+                help="This is a helper for this metric",
+                value="83%",
+            )
+        with s4:
+            st.metric(
+                border=True,
+                label="F1 Score",
+                help="This is a helper for this metric",
+                value="83%",
+            )
+        with s5:
+            st.metric(
+                border=True,
+                label="ROC-AUC",
+                help="This is a helper for this metric",
+                value="83%",
+            )
 
-        with st.container():
-            st.markdown("**Classification Performance**")
-            s1, s2, s3, s4, s5 = st.columns(5)
-            with s1:
-                st.metric(
-                    border=True,
-                    label="Accuracy",
-                    help="This is a helper for this metric",
-                    value="87%",
-                )
-            with s2:
-                st.metric(
-                    border=True,
-                    label="Precision",
-                    help="This is a helper for this metric",
-                    value="83%",
-                )
-            with s3:
-                st.metric(
-                    border=True,
-                    label="Recall",
-                    help="This is a helper for this metric",
-                    value="83%",
-                )
-            with s4:
-                st.metric(
-                    border=True,
-                    label="F1 Score",
-                    help="This is a helper for this metric",
-                    value="83%",
-                )
-            with s5:
-                st.metric(
-                    border=True,
-                    label="ROC-AUC",
-                    help="This is a helper for this metric",
-                    value="83%",
-                )
+    with st.container(border=True):
+        st.markdown("**Predicted vs. Actual NAT Scores**")
+        st.markdown("""<p class="sub-text">Visual comparison of prediction accuracy</p>""", unsafe_allow_html=True)
+        st.pyplot(fig)
 
-        with st.container(border=True):
-            st.markdown("**Predicted vs. Actual NAT Scores**")
-            st.markdown("""<p class="sub-text">Visual comparison of prediction accuracy</p>""", unsafe_allow_html=True)
-            st.pyplot(fig)
+    with st.container(border=True):
+        st.markdown("**Feature Importance**")
+        st.markdown("""<p class="sub-text">Most influential factors in prediction</p>""", unsafe_allow_html=True)
+        st.pyplot(fig2)
 
-        with st.container(border=True):
-            st.markdown("**Feature Importance**")
-            st.markdown("""<p class="sub-text">Most influential factors in prediction</p>""", unsafe_allow_html=True)
-            st.pyplot(fig2)
-
-        with st.container(border=True):
-            st.markdown("**Confusion Matrix**")
-            st.markdown("""<p class="sub-text">Classification accuracy by proficiency level</p>""", unsafe_allow_html=True)
-            st.pyplot(fig3)
+    with st.container(border=True):
+        st.markdown("**Confusion Matrix**")
+        st.markdown("""<p class="sub-text">Classification accuracy by proficiency level</p>""", unsafe_allow_html=True)
+        st.pyplot(fig3)

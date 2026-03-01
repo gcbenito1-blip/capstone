@@ -32,79 +32,20 @@ st.set_page_config(
     }
 )
 
-# Custom CSS
-st.markdown("""
+st.markdown(
+    """
     <style>
-    h1 a{
-        display:none; 
+    .sub-text {
+        color: grey;
     }
-    .main-header {
-        font-size: 2.5rem;
-        color: #1E88E5;
-        text-align: center;
-    }
-    .sub-header {
-        font-size: 1.5rem;
-        color: #0D47A1;
-        margin-top: 1rem;
-    }
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1
-    }
-
-    .card {
-    background-color: white; /* Background color */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
-    margin: 20px; /* Space around cards */
-    padding: 20px; /* Inner spacing */
-    transition: transform 0.2s; /* Animation effect */
-    }
-
-    .card:hover {
-        transform: scale(1.05); /* Scale up on hover */
-    }
-
-    .card-title {
-        font-size: 24px; /* Title font size */
-        color: #333; /* Title color */
-    }
-
-    .card-content {
-        font-size: 16px; /* Content font size */
-        color: #666; /* Content color */
-    }
-
-    .card-button {
-        background-color: #4CAF50; /* Button background */
-        border: none; /* No border */
-        color: white; /* Button text color */
-        padding: 10px 15px; /* Button padding */
-        text-align: center; /* Center alignment */
-        text-decoration: none; /* No underline */
-        display: inline-block; /* Inline-block for button */
-        margin-top: 10px; /* Space above button */
-        border-radius: 5px; /* Rounded corners for button */
-        cursor: pointer; /* Pointer on hover */
-    }
-
-    .sub-text{
-        font-size: 12px;
-        color: #6b7280;
-        line-height: 1.4;
-    }
-
     </style>
-""", unsafe_allow_html=True) 
-
+    """, unsafe_allow_html=True
+)
 # Title
 st.header(":pencil2: NAT-Lytics Model Evaluation and Prediction Dashboard", anchor=False)
 st.markdown('National Achievement Test Analysis & Prediction System')
 
-t1, t2, t3, t4= st.tabs([":material/upload: Upload Data", ":material/finance: Exploratory Data Analysis", ":material/search_insights: Model Evaluation", ":material/target: Prediction Results"])
+t1, t2, t3, t4= st.tabs([":material/upload: Upload Data", ":material/finance: Exploratory Data Analysis", ":material/target: Prediction Results", ":material/search_insights: Model Evaluation" ])
 with st.sidebar:
     st.sidebar.title(":rocket: Quick Start Guide")
     with st.container(border=True, ):
@@ -115,13 +56,24 @@ with st.sidebar:
         """, unsafe_allow_html=True)
 
 with t1:
+    st.header("Data Management & Upload", anchor=False)
+    st.markdown("""<p class="sub-text">Upload student data to generate NAT predictions and analysis</p>""", unsafe_allow_html=True)
+
     tab1.render()
 
 with t2:
+    st.header("Exploratory Data Analysis", anchor=False)
+    st.markdown("""<p class="sub-text">Understanding the characteristics and quality of the uploaded dataset</p>""", unsafe_allow_html=True)
     tab2.render()
 
-with t3:
+with t4: 
+    st.header('Model Summary', anchor=False)
+    st.markdown("""<p class="sub-text">Model Training Summary and Evaluation</p>""", unsafe_allow_html=True)
+
     tab3.render()
 
-with t4:
+with t3:
+    st.header('Prediction Results', anchor=False)
+    st.markdown("""<p class="sub-text">Predicted NAT outcomes for the uploaded dataset</p>""", unsafe_allow_html=True)
+
     tab4.render()

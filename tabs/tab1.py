@@ -8,11 +8,8 @@ def render():
         df = pd.read_csv("data/1.csv")
         df = df.iloc[0:0]
         return df.to_csv(index=False)
-
     template= get_data()
 
-    st.header("Data Management & Upload", anchor=False)
-    st.markdown("""<p class="sub-text"> Upload student data to generate NAT predictions and analysis</p>""", unsafe_allow_html=True)
 
     with st.container(border=True, ):
         st.write("**Step 1: Download Template**")
@@ -27,6 +24,7 @@ def render():
             * Final Ratings in 5 subjects from Grade 1 to Grade 6
             * Attendance Percentage
             """)
+
 
         st.download_button(
             label=":material/download: Download CSV Template",
