@@ -33,17 +33,15 @@ def render():
             data=template,
             file_name="template.csv",
             mime="text/csv",
-            type="primary",
+            type="secondary",
+            width="stretch"
             )
 
     with st.container(border=True, ):
-        st.write("**Step 3: Upload Filled template**")
-        st.markdown("""
-        Upload your completed CSV file
-        """, unsafe_allow_html=True)
+        st.write("**Step 2: Upload Filled template**")
 
         dataset = st.file_uploader("Upload your completed CSV file",type="csv")
-        tab1button = st.button(":material/query_stats: Generate Results", type="primary", key="tab1button")
+        tab1button = st.button(":material/query_stats: Generate Results", type="primary", key="tab1button", width="stretch")
 
         if tab1button and dataset is not None:
             df = pd.read_csv(dataset)
