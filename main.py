@@ -18,11 +18,12 @@ from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 from tabs import tab1, tab2, tab3, tab4
 import warnings
+
 warnings.filterwarnings('ignore')
 
 # Page configuration
 st.set_page_config(
-    page_title="NAT-Lytics",
+    page_title="NAT-lytics Dashboard",
     page_icon="assets/logo.png",
     layout="centered",
     initial_sidebar_state="auto",
@@ -90,8 +91,10 @@ st.markdown("""
         cursor: pointer; /* Pointer on hover */
     }
 
-    .card-button:hover {
-        background-color: #45a049; /* Darker green on hover */
+    .sub-text{
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.4;
     }
 
     </style>
@@ -106,8 +109,8 @@ with st.sidebar:
     st.sidebar.title(":rocket: Quick Start Guide")
     with st.container(border=True, ):
         st.markdown("""
-        1. Create a CSV file following the template.
-        1. Upload your own data.
+        1. Create your own dataset file following the provided template.
+        1. Upload your own dataset.
         1. Click 'Generate Results'
         """, unsafe_allow_html=True)
 
