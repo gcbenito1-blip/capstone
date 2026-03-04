@@ -1,24 +1,12 @@
-import streamlit_shadcn_ui as ui
 import streamlit as st
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (accuracy_score, precision_score, recall_score, 
-                           f1_score, roc_auc_score, confusion_matrix,
-                           classification_report)
-from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBClassifier
 from tabs import tab1, tab2, tab3, tab4
 import warnings
-
+import pandas as pd
+import regression
+import classification 
+from model import train_test_split_shared, regression_model, classification_model
+from sklearn.metrics import ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 warnings.filterwarnings('ignore')
 
 # Page configuration
@@ -69,11 +57,50 @@ with t2:
 with t4: 
     st.header('Model Summary', anchor=False)
     st.markdown("""<p class="sub-text">Model Training Summary and Evaluation</p>""", unsafe_allow_html=True)
+    # regression.regression_model()
+    # classification.classification_model()
+    df = pd.read_csv("cd.csv")
 
-    tab4.render()
+    # Shared split
+    split_data = train_test_split_shared(df)
+
+    # -----------------------
+    # Regression
+    # -----------------------
+    reg_pipe, X_test_reg, y_test_reg, reg_results, reg_metrics = regression_model(df, split_data)
+
+    st.markdown("**Regression Metrics**")
+    with st.expander("Regression Predictions"):
+        st.dataframe(reg_results)
+        fig, ax = plt.subplots()
+        ax.scatter(y_test_reg, reg_results["Predicted_mps"], alpha=0.7)
+        ax.plot([y_test_reg.min(), y_test_reg.max()], [y_test_reg.min(), y_test_reg.max()], 'r--')
+        ax.set_xlabel("Actual mps")
+        ax.set_ylabel("Predicted mps")
+        ax.set_title("Predicted vs Actual")
+        st.pyplot(fig)
+
+    # -----------------------
+    # Classification
+    # -----------------------
+    clf_pipe, X_test_clf, y_test_clf, clf_results, clf_metrics = classification_model(df, split_data)
+
+    st.markdown("**Classification Metrics**")
+    c1, c2, c3, c4, c5 = st.columns(5, border=True)
+    c1.metric("Accuracy", clf_metrics["Accuracy"])
+    c2.metric("Precision", clf_metrics["Precision"])
+    c3.metric("Recall", clf_metrics["Recall"])
+    c4.metric("F1", clf_metrics["F1"])
+    c5.metric("ROC AUC", clf_metrics["ROC_AUC"])
+
+    with st.expander("Classification Predictions"):
+        st.dataframe(clf_results)
+        fig, ax = plt.subplots()
+        ConfusionMatrixDisplay.from_estimator(clf_pipe, X_test_clf, y_test_clf, ax=ax)
+        ax.set_title("Confusion Matrix")
+        st.pyplot(fig)
 
 with t3:
     st.header('Prediction Results', anchor=False)
     st.markdown("""<p class="sub-text">Predicted NAT outcomes for the uploaded dataset</p>""", unsafe_allow_html=True)
-
     tab3.render()
