@@ -2,8 +2,6 @@ import streamlit as st
 from tabs import tab1, tab2, tab3, tab4
 import warnings
 import pandas as pd
-import regression
-import classification 
 from model import train_test_split_shared, regression_model, classification_model
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
@@ -57,8 +55,6 @@ with t2:
 with t4: 
     st.header('Model Summary', anchor=False)
     st.markdown("""<p class="sub-text">Model Training Summary and Evaluation</p>""", unsafe_allow_html=True)
-    # regression.regression_model()
-    # classification.classification_model()
     df = pd.read_csv("cd.csv")
 
     # Shared split
@@ -70,6 +66,10 @@ with t4:
     reg_pipe, X_test_reg, y_test_reg, reg_results, reg_metrics = regression_model(df, split_data)
 
     st.markdown("**Regression Metrics**")
+    r1, r2, r3 = st.columns(3, border=True)
+    r1.metric("R²", reg_metrics["R2"], help="Ranges from 0-1, Value Closer to 1, the better. 1='Perfect Prediction'")
+    r2.metric("Root Mean Squared Error", reg_metrics["RMSE"], help="Difference between the actual and predicted score. Bigger mistakes count more.")
+    r3.metric("Mean Average Error", reg_metrics["MAE"], help="Difference between the actual and predicted score. Treats all mistakes equally.")
     with st.expander("Regression Predictions"):
         st.dataframe(reg_results)
         fig, ax = plt.subplots()

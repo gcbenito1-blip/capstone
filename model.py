@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Ridge
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.inspection import permutation_importance
 from sklearn.metrics import (
     r2_score, root_mean_squared_error, mean_absolute_error,
     accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
