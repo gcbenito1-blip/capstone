@@ -7,3 +7,5 @@ nltk
 plotly
 xgboost
 streamlit-shadcn-ui
+pygwalker
+streamit-authenticator

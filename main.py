@@ -42,7 +42,7 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 # Title
-st.header(":pencil2: NAT-Lytics Model Evaluation and Prediction Dashboard", anchor=False)
+st.header(":pencil2: NAT-lytics Model Evaluation and Prediction Dashboard", anchor=False)
 st.markdown('National Achievement Test Analysis & Prediction System')
 
 t1, t2, t3, t4= st.tabs([":material/upload: Upload Data", ":material/finance: Exploratory Data Analysis", ":material/target: Prediction Results", ":material/search_insights: Model Evaluation" ])
@@ -63,17 +63,17 @@ with t1:
 
 with t2:
     st.header("Exploratory Data Analysis", anchor=False)
-    st.markdown("""<p class="sub-text">Understanding the characteristics and quality of the uploaded dataset</p>""", unsafe_allow_html=True)
+    # st.markdown("""<p class="sub-text">Understanding the characteristics and quality of the uploaded dataset</p>""", unsafe_allow_html=True)
     tab2.render()
 
 with t4: 
     st.header('Model Summary', anchor=False)
     st.markdown("""<p class="sub-text">Model Training Summary and Evaluation</p>""", unsafe_allow_html=True)
 
-    tab3.render()
+    tab4.render()
 
 with t3:
     st.header('Prediction Results', anchor=False)
     st.markdown("""<p class="sub-text">Predicted NAT outcomes for the uploaded dataset</p>""", unsafe_allow_html=True)
 
-    tab4.render()
+    tab3.render()

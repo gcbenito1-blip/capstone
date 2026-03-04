@@ -11,6 +11,8 @@ def render():
     template= get_data()
 
 
+    # t1, t2 = st.tabs(tabs=["Bulk Analysis", "Individual Analysis"])
+    # with t1:
     with st.container(border=True, ):
         st.write("**Step 1: Download Template**")
         st.markdown("""
@@ -36,13 +38,17 @@ def render():
             )
 
     with st.container(border=True, ):
+        is_disabled=True
         st.write("**Step 2: Upload Filled template**")
 
         dataset = st.file_uploader("Upload your completed CSV file",type="csv")
-        tab1button = st.button(":material/query_stats: Generate Results", type="primary", key="tab1button", width="stretch")
+        if dataset:
+            is_disabled = False
+            df = pd.read_csv(dataset)
+
+        tab1button = st.button(":material/query_stats: Upload Dataset", type="primary", key="tab1button", width="stretch", disabled=is_disabled)
 
         if tab1button and dataset is not None:
-            df = pd.read_csv(dataset)
             st.session_state['tab1_ready'] = True
             st.session_state['uploaded_data'] = df
-            st.success("Result Successfully Generated", icon="✅")
+            st.success("Dataset Ready for Exploratory Analysis", icon="✅")
