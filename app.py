@@ -110,15 +110,7 @@ with st.container(border=True, ):
 
         school_counts = df["School"].value_counts()
 
-        fig = plx.bar(school_counts)
-        fig.update_layout(
-            xaxis_tickangle = -45,
-            showlegend = False,
-            xaxis_title="School Name",
-            yaxis_title="Number of Students"
-        )
-        st.plotly_chart(fig)
-
+        st.dataframe(school_counts)
         # -------------------------
         # DEMOGRAPHIC SUMMARY
         # -------------------------
