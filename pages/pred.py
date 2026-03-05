@@ -1,5 +1,6 @@
 import streamlit as st
 from utils import require_data, get_data
+import joblib
 
 st.set_page_config(
     page_title="Prediction Results",
@@ -23,7 +24,13 @@ st.text("Learner-level MPS predictions and proficiency probabilities")
 require_data()
 
 df = get_data()
+r_model = joblib.load("models/regression_model.joblib")
+c_model = joblib.load("models/classification_model.joblib")
 
-st.dataframe(df)
-st.write("Shape:", df.shape)
-st.write("Columns:", df.columns)
+r_prediction = r_model.predict(df)
+c_prediction = c_model.predict(df)
+
+df['Regression Prediction']=r_prediction
+df['Classification Prediction']=c_prediction
+st.dataframe(df[['studentID', 'School', 'age', 'sex', 'BMI/nutrional status', 'mother tongue', 'Regression Prediction', 'Classification Prediction']])
+st.write(df["Classification Prediction"].value_counts())
