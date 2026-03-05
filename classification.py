@@ -1,35 +1,55 @@
+import os
 import pandas as pd
-import streamlit as st
+import numpy as np
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score 
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-# -----------------------
-# Load Data
-# -----------------------
-def classification_model():
-    df = pd.read_csv("cd.csv")
+
+def classification_model(df):
+
+    tdf = df.copy()
 
     # -----------------------
-    # Remove target-independent columns
+    # Create target variable
     # -----------------------
-    X = df.drop(columns=["proficiency", "mps"])  # mps removed, proficiency is target
-    y = df["proficiency"]
-    student_ids = X["studentID"]  # save for reference
-    X = X.drop(columns=["studentID"])  # remove from features
+    conditions = [
+        tdf["School MPS"] == 66.82,
+        tdf["School MPS"] == 73.08,
+        tdf["School MPS"] == 75.71
+    ]
+
+    choices = ["low proficient", "nearly proficient", "proficient"]
+
+    tdf["proficiency"] = np.select(conditions, choices, default="Unknown")
+
+    # -----------------------
+    # Features / Target
+    # -----------------------
+    X = tdf.drop(columns=["School MPS", "proficiency"])
+    y = tdf["proficiency"]
+
+    student_ids = X["studentID"]
+    X = X.drop(columns=["studentID"])
 
     # -----------------------
     # Column Types
     # -----------------------
-    numeric_cols = X.select_dtypes(include=["int64", "float64", "int32"]).columns
-    categorical_cols = ["sex"]
+    numeric_cols = X.select_dtypes(include=["number"]).columns
+
+    categorical_cols = [
+        "sex",
+        "BMI/nutrional status",
+        "mother tongue"
+    ]
 
     # -----------------------
-    # Preprocessing Pipelines
+    # Pipelines
     # -----------------------
     numeric_pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
@@ -46,9 +66,6 @@ def classification_model():
         ("cat", categorical_pipeline, categorical_cols)
     ])
 
-    # -----------------------
-    # Full Pipeline
-    # -----------------------
     pipe = Pipeline([
         ("preprocessor", preprocessor),
         ("model", RandomForestClassifier(random_state=42))
@@ -58,24 +75,28 @@ def classification_model():
     # Train/Test Split
     # -----------------------
     X_train, X_test, y_train, y_test, id_train, id_test = train_test_split(
-        X, y, student_ids,
+        X,
+        y,
+        student_ids,
         test_size=0.2,
         random_state=42,
-        stratify=y  # maintain class distribution
+        stratify=y
     )
 
     # -----------------------
-    # Train Model
+    # Train
     # -----------------------
     pipe.fit(X_train, y_train)
 
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(pipe, "models/classification_model.joblib")
     # -----------------------
     # Predict
     # -----------------------
     pred = pipe.predict(X_test)
 
     # -----------------------
-    # Results DataFrame
+    # Results
     # -----------------------
     results = pd.DataFrame({
         "studentID": id_test,
@@ -83,41 +104,27 @@ def classification_model():
         "Predicted_proficiency": pred
     }).reset_index(drop=True)
 
-
     # -----------------------
-    # Evaluation
+    # Metrics
     # -----------------------
-
-    # Binary or multi-class: specify average
     acc = accuracy_score(y_test, pred)
-    precision = precision_score(y_test, pred, average="weighted")  # weighted average per class
+    precision = precision_score(y_test, pred, average="weighted")
     recall = recall_score(y_test, pred, average="weighted")
     f1 = f1_score(y_test, pred, average="weighted")
 
-    # For ROC AUC in multi-class, use predicted probabilities
     proba = pipe.predict_proba(X_test)
     roc_auc = roc_auc_score(y_test, proba, multi_class="ovr", average="weighted")
 
-    st.header("Classification Metrics", anchor=False)
-    c1, c2, c3, c4, c5 = st.columns(5, border=True)
-    with c1:
-        st.metric("Accuracy:", round(acc, 2), help="Helper")
-    with c2:
-        st.metric("Precision:", round(precision, 2), help='Helper')
-    with c3:
-        st.metric("Recall:", round(recall, 2), help='Helper')
-    with c4:
-        st.metric("F1-score:", round(f1, 2), help='Helper')
-    with c5:
-        st.metric("ROC AUC:", round(roc_auc, 2), help='Helper')
-    st.markdown("**Classification Model Fitting Data**")
-    with st.expander(expanded=False, label="See Prediction Results From Test Data"):
-        st.dataframe(results)
 
-        from sklearn.metrics import ConfusionMatrixDisplay
-        import matplotlib.pyplot as plt
+    model = pipe.named_steps["model"]
 
-        fig, ax = plt.subplots()
-        ConfusionMatrixDisplay.from_estimator(pipe, X_test, y_test, ax=ax)
-        ax.set_title("Confusion Matrix")
-        st.pyplot(fig)
+    feature_names = pipe.named_steps["preprocessor"].get_feature_names_out()
+
+    importances = model.feature_importances_
+
+    feat_importance = pd.DataFrame({
+        "Feature": feature_names,
+        "Importance": importances
+    }).sort_values(by="Importance", ascending=False)
+
+    return results, acc, precision, recall, f1, roc_auc, feat_importance
