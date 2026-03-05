@@ -85,7 +85,7 @@ def regression_model(df, split_data):
         "Predicted_mps": pred
     })
     results["Error"] = results["Actual_mps"] - results["Predicted_mps"]
-    results["Predicted_proficiency_from_score"] = results["Predicted_mps"].apply(map_score_to_proficiency)
+    results["Proficiency_based_from_predicted_mps"] = results["Predicted_mps"].apply(map_score_to_proficiency)
     results = results.reset_index(drop=True)
 
     metrics = {
@@ -182,5 +182,5 @@ def combined_results(reg_results, clf_results):
         how="left"
     )
     combined = combined.rename(columns={"Predicted_proficiency": "Predicted_proficiency_classification"})
-    combined["Agreement"] = combined["Predicted_proficiency_from_score"] == combined["Predicted_proficiency_classification"]
+    combined["Agreement"] = combined["Proficiency_based_from_predicted_mps"] == combined["Predicted_proficiency_classification"]
     return combined
