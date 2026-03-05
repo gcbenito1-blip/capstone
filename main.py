@@ -6,6 +6,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 import seaborn as sns
 from model import train_test_split_shared, regression_model, classification_model, combined_results
+# from model1 import train_test_split_shared, regression_model, classification_model, combined_results, export_models, load_models
 warnings.filterwarnings('ignore')
 
 # Page configuration
@@ -61,6 +62,10 @@ with t4:
 
     # Shared split
     split_data = train_test_split_shared(df)
+    # reg_pipe, *_ = regression_model(df, split_data)
+    # clf_pipe, *_ = classification_model(df, split_data)
+
+    # export_models(reg_pipe, clf_pipe)
     with rtab:
         # -----------------------
         # Regression
@@ -120,17 +125,17 @@ with t4:
         c4.metric("F1", clf_metrics["F1"])
         c5.metric("ROC AUC", clf_metrics["ROC_AUC"])
 
-        with st.expander("Classification Predictions"):
-            # st.dataframe(clf_results)
-            fig, ax = plt.subplots(figsize=(6,4))
-            from sklearn.metrics import ConfusionMatrixDisplay
-            ConfusionMatrixDisplay.from_estimator(clf_pipe, X_test_clf, y_test_clf, ax=ax, cmap="Blues")
-            ax.set_title("Confusion Matrix")
-            plt.xticks(rotation=45)
-            st.pyplot(fig)
+        st.markdown("**Classification Predictions**")
+        # st.dataframe(clf_results)
+        fig, ax = plt.subplots(figsize=(4,3))
+        from sklearn.metrics import ConfusionMatrixDisplay
+        ConfusionMatrixDisplay.from_estimator(clf_pipe, X_test_clf, y_test_clf, ax=ax, cmap="Blues")
+        ax.set_title("Confusion Matrix")
+        plt.xticks(rotation=45)
+        st.pyplot(fig)
 
-        with st.expander("Classification Feature Importance"):
-            st.bar_chart(clf_feat_importance.set_index("Feature"))
+        st.markdown("**Classification Feature Importance**")
+        st.bar_chart(clf_feat_importance.set_index("Feature"))
 
     with com_tab:
         # # -----------------------

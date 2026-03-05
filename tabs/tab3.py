@@ -1,15 +1,15 @@
 # Prediction Tab
-
-
 import streamlit as st
-import streamlit_shadcn_ui as ui
-import pandas as pd
-
-df = pd.read_csv('data/1.csv')
+from model1 import load_models
 
 def render():
     if not st.session_state.get("tab2_ready", False):
         st.warning("Upload Your Data First")
     else:
-        st.dataframe(df)
+        test = st.session_state['dataset']
+        reg_pipe, clf_pipe = load_models()
+        reg_pipe = reg_pipe.predict(test)
+        clf_pipe = clf_pipe.predict(test)
 
+        st.write(reg_pipe)
+        st.write(clf_pipe)
