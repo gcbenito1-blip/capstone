@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import scipy as stats
 
 st.set_page_config(
     page_title="NAT-lytics",
@@ -130,15 +129,13 @@ with st.container(border=True, ):
         # -------------------------
         # OUTLIER DETECTION
         # -------------------------
-        st.subheader("Outlier Detection (Z-score method)")
+        st.subheader("Outlier Detection (Z-score > 3)")
         numeric_cols = df.select_dtypes(include=np.number).columns
-        if len(numeric_cols) > 0:
-            z_scores = np.abs(stats.zscore(df[numeric_cols].dropna()))
-            outlier_mask = (z_scores > 3)
-            outlier_counts = pd.DataFrame(outlier_mask.sum(axis=0), columns=["Outliers"])
-            st.dataframe(outlier_counts)
-        else:
-            st.info("No numeric features to detect outliers.")
+        outlier_counts = {}
+        for col in numeric_cols:
+            z = (df[col] - df[col].mean()) / df[col].std()
+            outlier_counts[col] = (z.abs() > 3).sum()
+        st.dataframe(pd.DataFrame.from_dict(outlier_counts, orient="index", columns=["Outliers"]))
         # -------------------------
         # PREPROCESSING PLAN
         # -------------------------
