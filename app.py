@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as plx
+import numpy as np
+import scipy as stats
 
 st.set_page_config(
     page_title="NAT-lytics",
@@ -127,6 +128,18 @@ with st.container(border=True, ):
             st.dataframe(df["BMI/nutrional status"].value_counts())
 
         # -------------------------
+        # OUTLIER DETECTION
+        # -------------------------
+        st.subheader("Outlier Detection (Z-score method)")
+        numeric_cols = df.select_dtypes(include=np.number).columns
+        if len(numeric_cols) > 0:
+            z_scores = np.abs(stats.zscore(df[numeric_cols].dropna()))
+            outlier_mask = (z_scores > 3)
+            outlier_counts = pd.DataFrame(outlier_mask.sum(axis=0), columns=["Outliers"])
+            st.dataframe(outlier_counts)
+        else:
+            st.info("No numeric features to detect outliers.")
+        # -------------------------
         # PREPROCESSING PLAN
         # -------------------------
         st.subheader("Preprocessing Pipeline")
@@ -134,23 +147,29 @@ with st.container(border=True, ):
         st.markdown("""
         **The following preprocessing will be applied:**
 
-        • Missing numerical values → **Median Imputation**  
-        • Missing categorical values → **Most Frequent Imputation**  
-        • Categorical variables → **One-Hot Encoding**  
-        • Numerical features → **Standard Scaling**  
-        • Student ID → **Excluded from model features**
+        1. **Handle Missing Values**
+           - Numerical → Median Imputation  
+           - Categorical → Most Frequent Imputation
+
+        2. **Outlier Handling**
+           - Remove or cap outliers in numeric features (Z-score > 3)
+
+        3. **Feature Engineering**
+           - Categorical variables → One-Hot Encoding  
+           - Numerical features → Standard Scaling
+
+        4. **Exclude Student ID** from model features
+
+        5. **Train-Test Split** for modeling
         """)
 
         # -------------------------
         # CONFIRM DATASET
         # -------------------------
         if st.button("Confirm Dataset and Continue", type="primary", width="stretch"):
-
             st.session_state["uploaded_data"] = df
             st.session_state["data_ready"] = True
-
             st.success(":check: Dataset ready for Exploratory Data Analysis")
-
             st.switch_page(
                 "pages/eda.py",
             )
