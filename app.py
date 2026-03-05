@@ -125,7 +125,6 @@ with st.container(border=True, ):
         with dcol3:
             st.write("**BMI Categories**")
             st.dataframe(df["BMI/nutrional status"].value_counts())
-
         # -------------------------
         # OUTLIER DETECTION
         # -------------------------
