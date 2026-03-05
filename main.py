@@ -84,14 +84,14 @@ with t4:
             st.markdown("**Predicted Proficiency Counts**")
 
             counts = (
-                reg_results["Predicted_proficiency_from_score"]
+                reg_results["Proficiency_based_from_predicted_mps"]
                 .value_counts()
                 .sort_index()
             )
 
             fig1 = plt.figure(figsize=(6,4))
             plt.bar(counts.index.astype(str), counts.values)
-            plt.xlabel("Predicted_proficiency_from_score")
+            plt.xlabel("Proficiency Based From Predicted MPS")
             plt.ylabel("Count")
             plt.xticks(rotation=45)
             st.pyplot(fig1)
@@ -164,7 +164,7 @@ with t4:
         # # Visualize Agreement / Disagreement
         # # -----------------------
         st.markdown("**Agreement Heatmap**")
-        heatmap_data = pd.crosstab(combined["Predicted_proficiency_from_score"],
+        heatmap_data = pd.crosstab(combined["Proficiency_based_from_predicted_mps"],
                                 combined["Predicted_proficiency_classification"])
         fig, ax = plt.subplots(figsize=(7,5))
         sns.heatmap(heatmap_data, annot=True, fmt="d", cmap="Blues", ax=ax)
@@ -176,4 +176,41 @@ with t4:
 with t3:
     st.header('Prediction Results', anchor=False)
     st.markdown("""<p class="sub-text">Predicted NAT outcomes for the uploaded dataset</p>""", unsafe_allow_html=True)
-    tab3.render()
+    if not st.session_state.get("tab2_ready", False):
+        st.warning("Upload Your Data First")
+    else:
+        import joblib
+        # Load model
+        r_model = joblib.load("saved_models/regression_model.joblib")
+        c_model = joblib.load("saved_models/classification_model.joblib")
+        # Load test data
+        df_test = st.session_state['dataset']
+        # Set studentID as index
+        df_test = df_test.set_index("studentID")
+        pt1, pt2, pt3= st.tabs(["Regression Prediction", "Classification Prediction", "Full Comparison"], default="Regression Prediction", width="stretch")
+
+        # Prepare features (drop non-features)
+        X_test = df_test.drop(columns=["mps", "proficiency"], errors="ignore")
+        # Predict
+        r_predictions = r_model.predict(X_test)
+        c_predictions = c_model.predict(X_test)
+        # Attach predictions
+        with pt1:
+            df_test["Predicted MPS"] = r_predictions
+            col1_display=[
+                "sex", "age", "Predicted MPS"
+            ]
+            st.dataframe(df_test[col1_display])
+
+        with pt2:
+            df_test["Predicted Proficiency"] = c_predictions
+            col2_display=[
+                "sex", "age", "Predicted Proficiency"
+            ]
+            st.dataframe(df_test[col2_display])
+
+        with pt3:
+            col3_display=[
+                "sex", "age", "Predicted MPS", "Predicted Proficiency"
+            ]
+            st.dataframe(df_test[col3_display])
