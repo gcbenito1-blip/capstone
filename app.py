@@ -152,9 +152,6 @@ with st.spinner("Loading Data Uploader"):
             - Categorical variables → One-Hot Encoding  
             - Numerical features → Standard Scaling
 
-            4. **Exclude Student ID** from model features
-
-            5. **Train-Test Split** for modeling
             """)
 
             # -------------------------
