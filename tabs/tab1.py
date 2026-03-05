@@ -5,7 +5,7 @@ import streamlit_shadcn_ui as ui
 def render():
     @st.cache_data
     def get_data():
-        df = pd.read_csv("data/1.csv")
+        df = pd.read_csv("template.csv")
         df = df.iloc[0:0]
         return df.to_csv(index=False)
     template= get_data()
@@ -22,7 +22,7 @@ def render():
         with st.container(border=True):
             st.markdown("""
             **Required Fields:**
-            * Student Demographics(Gender, Age, Mother Tongue, BMI)
+            * Student Demographics(Gender(M,F), Age, Mother Tongue, BMI)
             * Final Ratings in 5 subjects from Grade 1 to Grade 6
             * Attendance Percentage
             """)
