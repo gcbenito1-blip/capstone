@@ -1,107 +1,63 @@
-import streamlit as st
+# regression.py
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.impute import SimpleImputer
-from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score, root_mean_squared_error, mean_absolute_error
+import numpy as np
 
-
-def regression_model():
-    df = pd.read_csv('cd.csv')
-    # -----------------------
-    # Feature / Target Split
-    # -----------------------
-    df_model = df.drop(columns=["proficiency"])
-    std_id = df_model['studentID']
-
-    X = df_model.drop(columns=["mps", "studentID"])
-    y = df_model["mps"]
-
-    # -----------------------
-    # Column Types
-    # -----------------------
-    numeric_cols = X.select_dtypes(include=["int64", "float64", "int32"]).columns
-    categorical_cols = ["sex"]
-
-    # -----------------------
-    # Preprocessing
-    # -----------------------
-    numeric_pipeline = Pipeline([
-        ("imputer", SimpleImputer(strategy="median")),
-        ("scaler", StandardScaler())
-    ])
-
-    categorical_pipeline = Pipeline([
-        ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("encoder", OneHotEncoder(drop="first", handle_unknown="ignore"))
-    ])
-
+def train_regression(df):
+    """
+    Train a basic regression model on a dataframe and return predictions with evaluation metrics.
+    
+    Args:
+        df (pd.DataFrame): Dataset with 'studentID' as index and 'School MPS' as target.
+    
+    Returns:
+        pd.DataFrame: DataFrame with 'Actual' and 'Predicted' School MPS, indexed by studentID.
+    """
+    # Ensure studentID is index
+    if 'studentID' in df.columns:
+        df = df.set_index('studentID')
+    
+    # Features and target
+    X = df.drop(columns=["School MPS"])
+    y = df["School MPS"]
+    
+    # Identify categorical columns
+    categorical_cols = X.select_dtypes(include=['object']).columns.tolist()
+    
+    # Preprocessing pipeline
     preprocessor = ColumnTransformer([
-        ("num", numeric_pipeline, numeric_cols),
-        ("cat", categorical_pipeline, categorical_cols)
-    ])
-
-    # -----------------------
-    # Full Pipeline
-    # -----------------------
-    pipe = Pipeline([
+        ("cat", OneHotEncoder(handle_unknown='ignore'), categorical_cols)
+    ], remainder='passthrough')
+    
+    # Regression pipeline
+    model = Pipeline([
         ("preprocessor", preprocessor),
-        ("model", Ridge())
+        ("regressor", LinearRegression())
     ])
-
-    # -----------------------
-    # Train/Test Split
-    # -----------------------
-    X_train, X_test, y_train, y_test, id_train, id_test = train_test_split(
-        X, y, std_id,
-        test_size=0.2, 
-        random_state=42
-    )
-
-    # -----------------------
-    # Train
-    # -----------------------
-    pipe.fit(X_train, y_train)
-
-    # -----------------------
-    # Evaluate
-    # -----------------------
-    pred = pipe.predict(X_test)
     
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # Fit model
+    model.fit(X_train, y_train)
+    
+    # Predict
+    predictions = model.predict(X_test)
+    
+    # Evaluation metrics
+    r2 = r2_score(y_test, predictions)
+    rmse = np.sqrt(root_mean_squared_error(y_test, predictions))
+    mae = mean_absolute_error(y_test, predictions)
+    
+    # Return predictions with actual values
     results = pd.DataFrame({
-        "studentID": id_test,
-        "Actual_mps": y_test,
-        "Predicted_mps": pred
-    })
-
-    results["Error"] = results["Actual_mps"] - results["Predicted_mps"]
-
-    results = results.reset_index(drop=True)
-
-    r2 = round(r2_score(y_test, pred), 2)
-    rmse = round(root_mean_squared_error(y_test, pred), 2)
-    mae = round(mean_absolute_error(y_test, pred), 2)
-
-    st.header("Regression Model Metrics", anchor=False)
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.metric("R2 metric", value=r2, border=True, help="Range: 0 to 1. \nHigher the better, 1 = perfect prediction")
-    with c2:
-        st.metric("Root Mean Squared Error", value=rmse, border=True, help="Score difference from actual vs. predicted. Average error emphasizing worst-case mistakes")
-    with c3:
-        st.metric("Mean Absolute Error", value=mae, border=True, help="Score difference from actual vs. predicted. Average error you can expect normally")
+        "Actual School MPS": y_test,
+        "Predicted School MPS": predictions
+    }, index=X_test.index)
     
-    st.markdown("**Regression Model Fitting Data**", unsafe_allow_html=True)
-    with st.expander(expanded=False, label="See Prediction Results From Test Data"):
-        st.dataframe(results)
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        ax.scatter(y_test, pred, alpha=0.7)
-        ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--') 
-        ax.set_xlabel("Actual mps") 
-        ax.set_ylabel("Predicted mps") 
-        ax.set_title("Predicted vs Actual") 
-        st.pyplot(fig)
+    return results, r2, rmse, mae

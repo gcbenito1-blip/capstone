@@ -1,0 +1,21 @@
+1.	Dataset Upload & Preprocessing
+[x] Upload historical academic and demographic records (Excel/CSV).
+[x] View dataset summary: total records, missing values, distribution across schools and demographic categories.
+[-] Trigger preprocessing: missing value handling, encoding categorical variables, normalization, and merging.
+2.	Exploratory Data Analysis (EDA)
+[x] statistics for numeric and categorical variables.
+[x] visualizations: histograms, boxplots, scatterplots, correlation heatmaps.
+[-] options for schools, grades, or demographics to explore subgroup patterns.
+3.	Prediction Results Visualization
+[] inferred MPS (from school MPS) and probability of achieving proficiency.
+[] proficiency display (Not Proficient - Highly Proficient) using charts.
+[] contributions panel: shows which predictors influenced each learner’s predicted MPS.
+[] options by school, gender, mother tongue, BMI category.
+4.	Model Evaluation Tools
+[] metrics (RMSE, MAE, R²) and classification metrics (Accuracy, Precision, Recall, F1-score, ROC-AUC).
+[] ROC curves and confusion matrices.
+[] importance visualization for academic and demographic predictors.
+[] hyperparameter adjustment for model retraining.
+5.	Reports & Export Functionality
+[] predicted MPS and proficiency probabilities as CSV/Excel.
+[] visualizations and summary reports of model performance.

@@ -13,24 +13,7 @@ from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 )
 
-# -----------------------
-# Proficiency mapping for regression scores
-# -----------------------
-def map_score_to_proficiency(score):
-    if score >= 90:
-        return "Highly Proficient"
-    elif score >= 75:
-        return "Proficient"
-    elif score >= 50:
-        return "Nearly Proficient"
-    elif score >= 25:
-        return "Low Proficient"
-    else:
-        return "Not Proficient"
-
-# -----------------------
 # Shared Train/Test Split
-# -----------------------
 def train_test_split_shared(df, test_size=0.2, random_state=42):
     train_idx, test_idx = train_test_split(
         df.index, test_size=test_size, random_state=random_state
@@ -41,14 +24,13 @@ def train_test_split_shared(df, test_size=0.2, random_state=42):
 # Regression Pipeline
 # -----------------------
 def regression_model(df, split_data):
-    df_model = df.drop(columns=["proficiency"])
+    df_model = df.copy()
     std_id = df_model['studentID']
-
-    X = df_model.drop(columns=["mps", "studentID"])
-    y = df_model["mps"]
+    X = df_model.drop(columns=["School MPS", "studentID"])
+    y = df_model["School MPS"]
 
     numeric_cols = X.select_dtypes(include=["int64", "float64", "int32"]).columns
-    categorical_cols = ["sex"]
+    categorical_cols = ["sex", "BMI/nutrional status", "mother tongue"]
 
     numeric_pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
@@ -84,8 +66,6 @@ def regression_model(df, split_data):
         "Actual_mps": y_test,
         "Predicted_mps": pred
     })
-    results["Error"] = results["Actual_mps"] - results["Predicted_mps"]
-    results["Proficiency_based_from_predicted_mps"] = results["Predicted_mps"].apply(map_score_to_proficiency)
     results = results.reset_index(drop=True)
 
     metrics = {
@@ -110,13 +90,22 @@ def regression_model(df, split_data):
 # Classification Pipeline
 # -----------------------
 def classification_model(df, split_data):
-    X = df.drop(columns=["proficiency", "mps"])
+    X = df.drop(columns=["School MPS"])
+
+    conditions = [
+    df['School MPS'] == 66.82,
+    df['School MPS'] == 73.08,
+    df['School MPS'] == 75.71
+    ]
+    choices = ['low proficient', 'nearly proficient', 'proficient']
+    df['prof'] = np.select(conditions, choices, default='Unknown')
+
     y = df["proficiency"]
     student_ids = X["studentID"]
     X = X.drop(columns=["studentID"])
 
     numeric_cols = X.select_dtypes(include=["int64", "float64", "int32"]).columns
-    categorical_cols = ["sex"]
+    categorical_cols = ["sex", "BMI/nutrional status", "mother tongue"]
 
     numeric_pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
@@ -171,16 +160,3 @@ def classification_model(df, split_data):
     }).sort_values(by="Importance", ascending=False)
 
     return pipe, X_test, y_test, results, metrics, feat_importance
-
-# -----------------------
-# Combine Regression and Classification
-# -----------------------
-def combined_results(reg_results, clf_results):
-    combined = reg_results.merge(
-        clf_results[["studentID", "Predicted_proficiency"]],
-        on="studentID",
-        how="left"
-    )
-    combined = combined.rename(columns={"Predicted_proficiency": "Predicted_proficiency_classification"})
-    combined["Agreement"] = combined["Proficiency_based_from_predicted_mps"] == combined["Predicted_proficiency_classification"]
-    return combined
