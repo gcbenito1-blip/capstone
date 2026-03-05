@@ -69,7 +69,7 @@ def confusion_summary(results):
 
 summary_df = confusion_summary(c_results)
 st.markdown("**Confusion Matrix Summary**")
-st.dataframe(summary_df)
+st.dataframe(summary_df, hide_index=True)
 st.markdown("**Feature Importance Analysis For Classification Analysis**")
 st.text("Relative contribution of predictors to model performance")
 st.bar_chart(cfi.set_index("Feature"))

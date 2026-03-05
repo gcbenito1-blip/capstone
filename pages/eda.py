@@ -39,7 +39,7 @@ else:
             
     # Show basic info
     st.markdown("**Dataset Preview**")
-    st.dataframe(df.head())
+    st.dataframe(df.head(), hide_index=True)
     c1, c2 = st.columns(2)
     with c1:
         # Example: BMI / Nutritional Status
@@ -83,7 +83,7 @@ else:
     stats_df = pd.DataFrame(stats_list)
 
     st.markdown("**Descriptive Statistics for Academic Performance**")
-    st.table(stats_df)
+    st.dataframe(stats_df, hide_index=True)
 
     # Generate descriptive statistics for numeric columns
     numeric_stats = df.describe().T
@@ -154,4 +154,4 @@ else:
     summary[['Q1','Median','Q3','Mean']] = summary[['Q1','Median','Q3','Mean']].round(1)
     
     st.markdown("**Performance Distribution by Gender**")
-    st.dataframe(summary)
+    st.dataframe(summary, hide_index=True)

@@ -66,11 +66,9 @@ with st.container(border=True, ):
     is_disabled=True
     st.write("**Upload Filled template**")
 
-    dataset = st.file_uploader("Upload your completed CSV file",type="csv")
+    dataset = st.file_uploader("Upload your completed CSV file",type="csv", )
     if dataset is not None:
-
         df = pd.read_csv(dataset)
-
         st.success("Dataset successfully loaded")
 
         # -------------------------

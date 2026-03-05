@@ -33,7 +33,7 @@ c_prediction = c_model.predict(df)
 
 df['Regression Prediction']=r_prediction
 df['Classification Prediction']=c_prediction
-st.dataframe(df[['studentID', 'School', 'age', 'sex', 'BMI/nutrional status', 'mother tongue', 'Regression Prediction', 'Classification Prediction']])
+st.dataframe(df[['studentID', 'School', 'age', 'sex', 'BMI/nutrional status', 'mother tongue', 'Regression Prediction', 'Classification Prediction']], hide_index=True)
 # st.write(df["Classification Prediction"].value_counts())
 p1, p2 = st.columns(2)
 with p1:
