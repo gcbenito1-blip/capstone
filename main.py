@@ -57,7 +57,7 @@ with t4:
     st.header('Model Summary', anchor=False)
     st.markdown("""<p class="sub-text">Model Training Summary and Evaluation</p>""", unsafe_allow_html=True)
     df = pd.read_csv("cd.csv")
-    rtab, ctab, com_tab = st.tabs(["Regression", "Classification", "Insight"], default="Regression")
+    rtab, ctab, com_tab = st.tabs(["Regression", "Classification", "Full Comparison"], default="Regression")
 
     # Shared split
     split_data = train_test_split_shared(df)
@@ -141,7 +141,7 @@ with t4:
         st.dataframe(combined)
 
         # --- 2. Error Distribution (Histogram) ---
-        st.subheader("Error Distribution")
+        st.markdown("**Error Distribution**")
 
         fig2 = plt.figure()
         plt.hist(combined["Error"], bins=10)

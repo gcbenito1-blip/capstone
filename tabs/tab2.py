@@ -154,4 +154,4 @@ def render():
         ):
             st.session_state["tab2_ready"] = True
             st.session_state["dataset"] = st.session_state["uploaded_data"]
-            st.success("Prediction", icon="✅")
+            st.success("Prediction Generated", icon="✅")
