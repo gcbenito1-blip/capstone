@@ -1,5 +1,5 @@
-# model.py
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -14,29 +14,28 @@ from sklearn.metrics import (
 )
 
 # -----------------------
+# Proficiency mapping for regression scores
+# -----------------------
+def map_score_to_proficiency(score):
+    if score >= 90:
+        return "Highly Proficient"
+    elif score >= 75:
+        return "Proficient"
+    elif score >= 50:
+        return "Nearly Proficient"
+    elif score >= 25:
+        return "Low Proficient"
+    else:
+        return "Not Proficient"
+
+# -----------------------
 # Shared Train/Test Split
 # -----------------------
 def train_test_split_shared(df, test_size=0.2, random_state=42):
-    """
-    Returns a dictionary containing X_train, X_test, y_train, y_test for regression,
-    and X_train_clf, X_test_clf, y_train_clf, y_test_clf for classification,
-    ensuring both use the same student split.
-    """
-    std_id = df['studentID']
-    
-    # Split indices only
     train_idx, test_idx = train_test_split(
-        df.index,
-        test_size=test_size,
-        random_state=random_state
+        df.index, test_size=test_size, random_state=random_state
     )
-    
-    split_data = {
-        "train_idx": train_idx,
-        "test_idx": test_idx
-    }
-    
-    return split_data
+    return {"train_idx": train_idx, "test_idx": test_idx}
 
 # -----------------------
 # Regression Pipeline
@@ -55,12 +54,10 @@ def regression_model(df, split_data):
         ("imputer", SimpleImputer(strategy="median")),
         ("scaler", StandardScaler())
     ])
-
     categorical_pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
         ("encoder", OneHotEncoder(drop="first", handle_unknown="ignore"))
     ])
-
     preprocessor = ColumnTransformer([
         ("num", numeric_pipeline, numeric_cols),
         ("cat", categorical_pipeline, categorical_cols)
@@ -74,21 +71,21 @@ def regression_model(df, split_data):
     train_idx = split_data["train_idx"]
     test_idx = split_data["test_idx"]
 
-    X_train = X.loc[train_idx]
-    y_train = y.loc[train_idx]
-    X_test = X.loc[test_idx]
-    y_test = y.loc[test_idx]
+    X_train, y_train = X.loc[train_idx], y.loc[train_idx]
+    X_test, y_test = X.loc[test_idx], y.loc[test_idx]
     id_test = std_id.loc[test_idx]
 
     pipe.fit(X_train, y_train)
     pred = pipe.predict(X_test)
 
+    # Results with mapped proficiency
     results = pd.DataFrame({
         "studentID": id_test,
         "Actual_mps": y_test,
         "Predicted_mps": pred
     })
     results["Error"] = results["Actual_mps"] - results["Predicted_mps"]
+    results["Predicted_proficiency_from_score"] = results["Predicted_mps"].apply(map_score_to_proficiency)
     results = results.reset_index(drop=True)
 
     metrics = {
@@ -97,7 +94,17 @@ def regression_model(df, split_data):
         "MAE": round(mean_absolute_error(y_test, pred), 2)
     }
 
-    return pipe, X_test, y_test, results, metrics
+    # Feature importance via permutation (works for Ridge)
+    perm_importance = permutation_importance(pipe, X_test, y_test, n_repeats=10, random_state=42)
+    numeric_features = numeric_cols
+    categorical_features = pipe.named_steps["preprocessor"].named_transformers_["cat"].named_steps["encoder"].get_feature_names_out(categorical_cols)
+    all_features = np.concatenate([numeric_features, categorical_features])
+    feat_importance = pd.DataFrame({
+        "Feature": all_features,
+        "Importance": perm_importance.importances_mean
+    }).sort_values(by="Importance", ascending=False)
+
+    return pipe, X_test, y_test, results, metrics, feat_importance
 
 # -----------------------
 # Classification Pipeline
@@ -115,12 +122,10 @@ def classification_model(df, split_data):
         ("imputer", SimpleImputer(strategy="median")),
         ("scaler", StandardScaler())
     ])
-
     categorical_pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
         ("encoder", OneHotEncoder(drop="first", handle_unknown="ignore"))
     ])
-
     preprocessor = ColumnTransformer([
         ("num", numeric_pipeline, numeric_cols),
         ("cat", categorical_pipeline, categorical_cols)
@@ -134,10 +139,8 @@ def classification_model(df, split_data):
     train_idx = split_data["train_idx"]
     test_idx = split_data["test_idx"]
 
-    X_train = X.loc[train_idx]
-    y_train = y.loc[train_idx]
-    X_test = X.loc[test_idx]
-    y_test = y.loc[test_idx]
+    X_train, y_train = X.loc[train_idx], y.loc[train_idx]
+    X_test, y_test = X.loc[test_idx], y.loc[test_idx]
     id_test = student_ids.loc[test_idx]
 
     pipe.fit(X_train, y_train)
@@ -158,4 +161,26 @@ def classification_model(df, split_data):
         "ROC_AUC": round(roc_auc_score(y_test, proba, multi_class="ovr", average="weighted"), 2)
     }
 
-    return pipe, X_test, y_test, results, metrics
+    # Feature importance for Random Forest
+    numeric_features = numeric_cols
+    categorical_features = pipe.named_steps["preprocessor"].named_transformers_["cat"].named_steps["encoder"].get_feature_names_out(categorical_cols)
+    all_features = np.concatenate([numeric_features, categorical_features])
+    feat_importance = pd.DataFrame({
+        "Feature": all_features,
+        "Importance": pipe.named_steps["model"].feature_importances_
+    }).sort_values(by="Importance", ascending=False)
+
+    return pipe, X_test, y_test, results, metrics, feat_importance
+
+# -----------------------
+# Combine Regression and Classification
+# -----------------------
+def combined_results(reg_results, clf_results):
+    combined = reg_results.merge(
+        clf_results[["studentID", "Predicted_proficiency"]],
+        on="studentID",
+        how="left"
+    )
+    combined = combined.rename(columns={"Predicted_proficiency": "Predicted_proficiency_classification"})
+    combined["Agreement"] = combined["Predicted_proficiency_from_score"] == combined["Predicted_proficiency_classification"]
+    return combined
