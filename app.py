@@ -66,10 +66,14 @@ with st.container(border=True, ):
     is_disabled=True
     st.write("**Upload Filled template**")
 
-    dataset = st.file_uploader("Upload your completed CSV file",type="csv")
+    dataset = st.file_uploader("Upload your completed CSV file",type=["csv", "xlsx"])
     if dataset is not None:
 
-        df = pd.read_csv(dataset)
+        if dataset.name.endswith(".csv"):
+            df = pd.read_csv(dataset)
+
+        elif dataset.name.endswith(".xlsx"):
+            df = pd.read_excel(dataset)
 
         st.success("Dataset successfully loaded")
 
