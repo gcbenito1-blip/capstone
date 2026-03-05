@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as plx
 
 st.set_page_config(
     page_title="NAT-lytics",
@@ -66,13 +67,98 @@ with st.container(border=True, ):
     st.write("**Upload Filled template**")
 
     dataset = st.file_uploader("Upload your completed CSV file",type="csv")
-    if dataset:
-        is_disabled = False
+    if dataset is not None:
+
         df = pd.read_csv(dataset)
 
-    tab1button = st.button(":material/query_stats: Upload Dataset", type="primary", key="tab1button", width="stretch", disabled=is_disabled)
+        st.success("Dataset successfully loaded")
 
-    if tab1button and dataset is not None:
-        st.session_state['uploaded_data'] = df
-        st.session_state['data_ready'] = True
-        st.success("Dataset Ready for Exploratory Analysis", icon="✅")
+        # -------------------------
+        # DATASET SUMMARY
+        # -------------------------
+        st.subheader("Dataset Overview")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric("Total Records", len(df))
+
+        with col2:
+            st.metric("Total Features", df.shape[1])
+
+        # -------------------------
+        # MISSING VALUES
+        # -------------------------
+        st.subheader("Missing Values")
+
+        missing = df.isnull().sum()
+        missing = missing[missing > 0]
+
+        if len(missing) > 0:
+            st.dataframe(missing.rename("Missing Count"))
+        else:
+            st.info("No missing values detected")
+
+        # -------------------------
+        # SCHOOL DISTRIBUTION
+        # -------------------------
+        st.subheader("School Distribution")
+
+        school_counts = df["School"].value_counts()
+
+        fig = plx.bar(school_counts)
+        fig.update_layout(
+            xaxis_tickangle = -45,
+            showlegend = False,
+            xaxis_title="School Name",
+            yaxis_title="Number of Students"
+        )
+        st.plotly_chart(fig)
+
+        # -------------------------
+        # DEMOGRAPHIC SUMMARY
+        # -------------------------
+        st.subheader("Demographic Summary")
+
+        dcol1, dcol2, dcol3 = st.columns(3)
+
+        with dcol1:
+            st.write("**Gender Distribution**")
+            st.dataframe(df["sex"].value_counts())
+
+        with dcol2:
+            st.write("**Mother Tongue**")
+            st.dataframe(df["mother tongue"].value_counts())
+
+        with dcol3:
+            st.write("**BMI Categories**")
+            st.dataframe(df["BMI/nutrional status"].value_counts())
+
+        # -------------------------
+        # PREPROCESSING PLAN
+        # -------------------------
+        st.subheader("Preprocessing Pipeline")
+
+        st.markdown("""
+        **The following preprocessing will be applied:**
+
+        • Missing numerical values → **Median Imputation**  
+        • Missing categorical values → **Most Frequent Imputation**  
+        • Categorical variables → **One-Hot Encoding**  
+        • Numerical features → **Standard Scaling**  
+        • Student ID → **Excluded from model features**
+        """)
+
+        # -------------------------
+        # CONFIRM DATASET
+        # -------------------------
+        if st.button("Confirm Dataset and Continue", type="primary", width="stretch"):
+
+            st.session_state["uploaded_data"] = df
+            st.session_state["data_ready"] = True
+
+            st.success(":check: Dataset ready for Exploratory Data Analysis")
+
+            st.switch_page(
+                "pages/eda.py",
+            )

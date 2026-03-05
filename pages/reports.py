@@ -33,33 +33,26 @@ with st.container(border=True):
     st.text("Complete documentation and analysis packages")
 
     with st.container(border=True):
-        c1, c2, c3 = st.columns([1, 4, 1])
+        c1, c2 = st.columns([4, 1], vertical_alignment="center")
         with c1:
-            st.markdown("::material/file")
-        with c2:
-            st.markdown("**Complete Analysis Report**")
+            st.markdown("**:material/docs: Complete Analysis Report**")
             st.text("All data including raw inputs, predictions, and metadata")
-        with c3:
-            st.markdown("download")
+        with c2:
+            st.button("download", key="1")
     with st.container(border=True):
-        c1, c2, c3 = st.columns([1, 4, 1])
+        c1, c2 = st.columns([4, 1], vertical_alignment="center", width="stretch")
         with c1:
-            st.markdown("::material/file")
-        with c2:
-            st.markdown("**Executive Summary**")
+            st.markdown("**:material/docs: Complete Analysis Report**")
             st.text("All data including raw inputs, predictions, and metadata")
-        with c3:
-            st.markdown("download")
+        with c2:
+            st.button("download", key="2")
     with st.container(border=True):
-        c1, c2, c3 = st.columns([1, 4, 1])
+        c1, c2 = st.columns([4, 1], vertical_alignment="center")
         with c1:
-            st.markdown("::material/file")
-        with c2:
-            st.markdown("**Full Dataset Export**")
+            st.markdown("**:material/docs: Complete Analysis Report**")
             st.text("All data including raw inputs, predictions, and metadata")
-        with c3:
-            st.markdown("download")
-
+        with c2:
+            st.button("download", key="3")
 
 # Prediction Data
 with st.container(border=True):
@@ -136,7 +129,7 @@ with st.container(border=True):
     with st.container(border=True):
         c1, c2, c3 = st.columns([1, 4, 1])
         with c1:
-            st.markdown("::material/file")
+            st.markdown(":material/docs:")
         with c2:
             st.markdown("**Complete Analysis Report**")
             st.text("All data including raw inputs, predictions, and metadata")
@@ -145,7 +138,7 @@ with st.container(border=True):
     with st.container(border=True):
         c1, c2, c3 = st.columns([1, 4, 1])
         with c1:
-            st.markdown("::material/file")
+            st.markdown(":material/docs:")
         with c2:
             st.markdown("**Executive Summary**")
             st.text("All data including raw inputs, predictions, and metadata")
@@ -154,7 +147,7 @@ with st.container(border=True):
     with st.container(border=True):
         c1, c2, c3 = st.columns([1, 4, 1])
         with c1:
-            st.markdown("::material/file")
+            st.markdown(":material/docs:")
         with c2:
             st.markdown("**Full Dataset Export**")
             st.text("All data including raw inputs, predictions, and metadata")
